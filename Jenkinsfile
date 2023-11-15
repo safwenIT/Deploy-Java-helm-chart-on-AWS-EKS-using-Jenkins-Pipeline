@@ -28,16 +28,25 @@ pipeline {
         }
 
 
-    stage('Deploy Docker Image to DockerHub') {
-            steps {
-                script {
-                    withCredentials([string(credentialsId: safwenit, variable: 'safwenit')]) {
-                        sh "docker login -u   safwenit   -p ${safwenit}"
-                    }
-                    sh "docker push safwenit/formation-devops"
+  stage('Docker Login') {
+    steps {
+        script {
+            def safwenit = 'docker-hub-credentials'
+
+            // Use input to prompt for Docker Hub password
+            def userInput = input(
+                id: 'docker-login-input',
+                message: 'Enter Docker Hub Password',
+                parameters: [password(name: 'DOCKER_PASSWORD', defaultValue: '', description: 'Docker Hub Password')]
+            )
+
+            // Use entered password for Docker login
+            withCredentials([string(credentialsId: safwenit, variable: 'DOCKER_USERNAME'), userInput]) {
+                sh "echo '\${DOCKER_PASSWORD}' | docker login --username=\${DOCKER_USERNAME} --password-stdin"
+            }
         }
-            }   
-        }
+    }
+
          
      stage('Deploying java helm chart on eks') {
       steps {
