@@ -18,22 +18,23 @@ pipeline {
                 }
             }     
   
-     stage('build java Docker Image') {
+     
+    stage('build java Docker Image') {
             steps {
                 script {
-                  sh 'docker build -t safwenit/java-1.0 .'
+                  sh 'docker build -t safwenit/formation-devops .'
                 }
             }
         }
 
 
-      stage('Deploy Docker Image to DockerHub') {
+    stage('Deploy Docker Image to DockerHub') {
             steps {
                 script {
                     withCredentials([string(credentialsId: safwenit, variable: 'safwenit')]) {
                         sh "docker login -u   safwenit   -p ${safwenit}"
                     }
-                    sh "docker push safwenit/java-1.0"
+                    sh "docker push safwenit/formation-devops"
         }
             }   
         }
