@@ -28,7 +28,7 @@ pipeline {
         }
 
 
-stages {
+     stages {
         stage('Docker Login') {
             steps {
                 script {
@@ -46,6 +46,22 @@ stages {
                 }
             }
         }
+
+        // Add your other stages here
+    }
+
+    post {
+        always {
+            // Logout from Docker Hub after the pipeline
+            script {
+                sh 'docker logout'
+            }
+        }
+    }
+}
+
+
+  stage('Deploy Docker Image to DockerHub') {
          
      stage('Deploying java helm chart on eks') {
       steps {
