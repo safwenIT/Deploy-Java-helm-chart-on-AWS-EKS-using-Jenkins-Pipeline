@@ -28,25 +28,24 @@ pipeline {
         }
 
 
-  stage('Docker Login') {
-    steps {
-        script {
-            def safwenit = 'docker-hub-credentials'
+stages {
+        stage('Docker Login') {
+            steps {
+                script {
+                    // Set Docker Hub credentials
+                    def dockerHubUsername = 'safwenit'
+                    def dockerHubPassword = 'maker1988'
 
-            // Use input to prompt for Docker Hub password
-            def userInput = input(
-                id: 'docker-login-input',
-                message: 'Enter Docker Hub Password',
-                parameters: [password(name: 'DOCKER_PASSWORD', defaultValue: '', description: 'Docker Hub Password')]
-            )
+                    // Login to Docker Hub
+                    def loginCmd = "docker login --username=${dockerHubUsername} --password-stdin"
+                    def loginStatus = sh(script: "echo '${dockerHubPassword}' | ${loginCmd}", returnStatus: true)
 
-            // Use entered password for Docker login
-            withCredentials([string(credentialsId: safwenit, variable: 'DOCKER_USERNAME'), userInput]) {
-                sh "echo '\${DOCKER_PASSWORD}' | docker login --username=\${DOCKER_USERNAME} --password-stdin"
+                    if (loginStatus != 0) {
+                        error("Docker login failed. Please check your credentials.")
+                    }
+                }
             }
         }
-    }
-
          
      stage('Deploying java helm chart on eks') {
       steps {
