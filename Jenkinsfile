@@ -18,8 +18,7 @@ pipeline {
                 }
             }     
   
-     
-    stage('build java Docker Image') {
+     stage('build java Docker Image') {
             steps {
                 script {
                   sh 'docker build -t safwenit/formation-devops .'
@@ -28,40 +27,16 @@ pipeline {
         }
 
 
-     stages {
-        stage('Docker Login') {
+      stage('Deploy Docker Image to DockerHub') {
             steps {
                 script {
-                    // Set Docker Hub credentials
-                    def dockerHubUsername = 'safwenit'
-                    def dockerHubPassword = 'maker1988'
-
-                    // Login to Docker Hub
-                    def loginCmd = "docker login --username=${dockerHubUsername} --password-stdin"
-                    def loginStatus = sh(script: "echo '${dockerHubPassword}' | ${loginCmd}", returnStatus: true)
-
-                    if (loginStatus != 0) {
-                        error("Docker login failed. Please check your credentials.")
+                    withCredentials ([string(credentialsId: 'safwenit', variable:  'safwenit')]) {
+                        sh 'docker login -u   safwenit   -p ${safwenit}'
                     }
-                }
-            }
+                    sh 'docker push safwenit/formation-devops:latest'
         }
-
-        // Add your other stages here
-    }
-
-    post {
-        always {
-            // Logout from Docker Hub after the pipeline
-            script {
-                sh 'docker logout'
-            }
+            }   
         }
-    }
-}
-
-
-  stage('Deploy Docker Image to DockerHub') {
          
      stage('Deploying java helm chart on eks') {
       steps {
